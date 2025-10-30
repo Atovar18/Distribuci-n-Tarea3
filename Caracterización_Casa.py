@@ -158,10 +158,12 @@ def generar_curva_duracion(df):
     plt.tight_layout()
     fig3.savefig('curva_duracion_carga.png', dpi=300)
     
+    return tabla_duracion
+    
 
 
 if Curva_de_duracion == 'Y':
-    generar_curva_duracion(df)
+    Tabla_duracion = generar_curva_duracion(df)
     
 # Obtener valor máximo de potencia total.
 D_max = df['pot_total'].max() #Demanda máxima en kVA.
@@ -287,6 +289,46 @@ df_resultados['Factor de Carga'] = Fc
 df_resultados['Factor de Diversidad'] = Fdiv
 df_resultados['Factor de Coincidencia'] = Fcoinc
 df_resultados['Tiempo Máx Operación a Dem Max (hrs/año)'] = TiempoMax
+
+if 'Tabla_duracion' in globals():
+    fig4, ax4 = plt.subplots(figsize=(20, 8))
+
+    x = Tabla_duracion['Porcentaje_Tiempo'].values
+    y = Tabla_duracion['pot_total'].values
+
+    # ancho de barras similar al usado antes
+    x_range = x.max() - x.min() if x.max() != x.min() else 1.0
+    width = (x_range / len(x)) * 0.6
+    width = max(width, 0.05)
+
+    ax4.bar(x, y, width=width, align='center', alpha=0.8, color='black', edgecolor='k', linewidth=0.2)
+
+    # obtener valor escalar de demanda_promedio (puede ser Series)
+    try:
+        demanda_promedio_val = float(demanda_promedio.iloc[0])
+    except Exception:
+        demanda_promedio_val = float(demanda_promedio)
+
+    # línea horizontal de la demanda promedio (color visible y label)
+    ax4.axhline(y=demanda_promedio_val, color='red', linestyle='--', linewidth=2,
+                label=f'Demanda promedio = {demanda_promedio_val:.2f} kW')
+
+    # ejes y formato
+    ax4.set_xlim(0, 100)  # opcional: fija 0..100% en x
+    y_max = int(np.ceil(y.max())) if len(y) > 0 else 1
+    ax4.set_ylim(0, max(y_max, 1) * 1.05)
+    ax4.set_xticks(np.arange(0, 101, 10))
+    ax4.set_yticks(np.arange(0, y_max + 1, 1))
+
+    ax4.set_title('Curva de Duración de la Carga con Demanda Promedio', fontsize=14, fontweight='bold')
+    ax4.set_ylabel('kVA')
+    ax4.set_xlabel('Porcentaje de Tiempo (%)')
+    ax4.grid(True, alpha=0.3)
+    ax4.legend()
+
+    plt.tight_layout()
+    fig4.savefig('curva_duracion_con_promedio.png', dpi=300)
+    plt.show()
 
 # Exportar el DataFrame de resultados a Excel
 output_path = 'Resultados.xlsx'
