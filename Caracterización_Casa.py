@@ -331,7 +331,7 @@ if 'Tabla_duracion' in globals():
     plt.show()
 
 # Exportar el DataFrame de resultados a Excel
-output_path = 'Resultados.xlsx'
+output_path = 'Resultados_casa.xlsx'
 try:
     with pd.ExcelWriter(output_path, engine='openpyxl') as writer:
         df_resultados.to_excel(writer, sheet_name='Detalle', index=False)
